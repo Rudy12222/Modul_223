@@ -10,6 +10,18 @@ const userService = new UserService();
 
 router.use(requireAuth);
 
+router.get("/", requireRole(Role.ADMIN), (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const users = userService.getAllUsers(req.user!.role);
+
+        res.json({
+            users: users.map((user) => serializeUser(user))
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.get("/check-username", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const username = String(req.query.username ?? "");

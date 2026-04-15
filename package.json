@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "npm --prefix backend run dev",
     "typecheck": "npm --prefix backend run typecheck",
-    "build": "npm --prefix backend run build"
+    "build": "npm --prefix backend run build",
+    "manage-role": "npm --prefix backend run manage-role --"
   }
 }

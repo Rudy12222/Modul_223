@@ -8,6 +8,18 @@ const commentService = new CommentService();
 
 router.use(requireAuth);
 
+router.get("/post/:postId", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const comments = commentService.getCommentsByPost(Number(req.params.postId));
+
+        res.json({
+            comments: comments.map((comment) => comment.toObject())
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.post("/", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { content, postId } = req.body as {

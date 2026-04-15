@@ -81,6 +81,12 @@ export class UserService {
         ORDER BY created_at DESC, id DESC
     `);
 
+    private readonly getAllUsersStatement = db.prepare(`
+        SELECT id, username, password_hash, role, blocked, created_at
+        FROM users
+        ORDER BY created_at DESC, id DESC
+    `);
+
     public getUserById(userId: number): User {
         const userRow = this.findExistingUserRow(userId);
 
@@ -158,6 +164,14 @@ export class UserService {
 
     public unblockUser(targetUserId: number, actorRole: Role): User {
         return this.setBlockedStatus(targetUserId, false, actorRole);
+    }
+
+    public getAllUsers(actorRole: Role): User[] {
+        this.ensureAdmin(actorRole);
+
+        const userRows = this.getAllUsersStatement.all() as UserRow[];
+
+        return userRows.map((userRow) => this.mapRowToUser(userRow));
     }
 
     private setBlockedStatus(targetUserId: number, blocked: boolean, actorRole: Role): User {

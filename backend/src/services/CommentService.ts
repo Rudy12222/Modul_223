@@ -44,6 +44,13 @@ export class CommentService {
         WHERE id = ?
     `);
 
+    private readonly findCommentsByPostIdStatement = db.prepare(`
+        SELECT id, content, created_at, updated_at, user_id, post_id
+        FROM comments
+        WHERE post_id = ?
+        ORDER BY created_at ASC, id ASC
+    `);
+
     public createComment(content: string, userId: number, postId: number): Comment {
         this.ensurePostExists(postId);
 
@@ -87,6 +94,14 @@ export class CommentService {
         }
 
         this.deleteCommentStatement.run(commentId);
+    }
+
+    public getCommentsByPost(postId: number): Comment[] {
+        this.ensurePostExists(postId);
+
+        const commentRows = this.findCommentsByPostIdStatement.all(postId) as CommentRow[];
+
+        return commentRows.map((commentRow) => this.mapRowToComment(commentRow));
     }
 
     private findCommentRowById(commentId: number): CommentRow | undefined {

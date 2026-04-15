@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniTwitter</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div id="message-box" class="message hidden"></div>
+
+        <main>
+            <section id="auth-view" class="view auth-screen">
+                <section class="auth-hero">
+                    <div class="auth-brand">
+                        <div class="logo-orb">M</div>
+                        <span>MiniTwitter</span>
+                    </div>
+
+                    <div class="auth-copy-block">
+                        <h1>Kurz posten. Direkt reagieren. Schnell im Gespräch bleiben.</h1>
+                        <p class="auth-copy">
+                            Eine schlanke Social App für Beiträge, Kommentare, Reaktionen
+                            und Moderation in einer klaren Oberfläche.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="auth-panels">
+                    <section class="card auth-card">
+                        <header class="card-head">
+                            <div>
+                                <span class="card-label">Account</span>
+                                <h2>Einloggen</h2>
+                            </div>
+                        </header>
+
+                        <form id="login-form" class="stack-form">
+                            <label>
+                                Benutzername
+                                <input name="username" type="text" required>
+                            </label>
+                            <label>
+                                Passwort
+                                <input name="password" type="password" required>
+                            </label>
+                            <button type="submit" class="button primary wide">Login</button>
+                        </form>
+                    </section>
+
+                    <section class="card auth-card auth-card-alt">
+                        <header class="card-head">
+                            <div>
+                                <span class="card-label">Neu hier?</span>
+                                <h2>Registrieren</h2>
+                            </div>
+                        </header>
+
+                        <form id="register-form" class="stack-form">
+                            <label>
+                                Benutzername
+                                <input name="username" type="text" required>
+                            </label>
+                            <label>
+                                Passwort
+                                <input name="password" type="password" required>
+                            </label>
+                            <button type="submit" class="button primary wide">Registrieren</button>
+                        </form>
+                    </section>
+                </section>
+            </section>
+
+            <section id="app-view" class="view hidden">
+                <div class="app-shell">
+                    <aside class="sidebar-column">
+                        <div class="card sidebar-card">
+                            <div class="sidebar-brand">
+                                <div class="logo-orb">M</div>
+                                <div class="sidebar-brand-copy">
+                                    <strong>MiniTwitter</strong>
+                                    <span>Home</span>
+                                </div>
+                            </div>
+
+                            <nav class="sidebar-nav">
+                                <button class="button nav-button active" data-view-target="feed">Feed</button>
+                                <button class="button nav-button" data-view-target="profile">Profil</button>
+                                <button id="admin-nav-button" class="button nav-button hidden" data-view-target="admin">Admin</button>
+                            </nav>
+
+                            <section class="account-card">
+                                <div id="account-avatar" class="avatar-badge avatar-large">MT</div>
+                                <div class="account-card-main">
+                                    <strong id="status-user">Nicht eingeloggt</strong>
+                                    <span id="account-handle" class="account-handle">@guest</span>
+                                </div>
+                                <div class="account-pills">
+                                    <span id="account-role" class="pill hidden"></span>
+                                    <span id="account-state" class="pill hidden"></span>
+                                </div>
+                            </section>
+
+                            <button id="logout-button" class="button ghost wide">Abmelden</button>
+                        </div>
+                    </aside>
+
+                    <section class="timeline-column">
+                        <section id="feed-section" class="app-section">
+                            <div class="card composer-card">
+                                <div class="section-head">
+                                    <div>
+                                        <h2>Startseite</h2>
+                                        <p class="section-copy">Alle Beiträge in chronologischer Reihenfolge.</p>
+                                    </div>
+                                    <button id="reload-feed-button" class="button subtle">Aktualisieren</button>
+                                </div>
+
+                                <form id="post-form" class="composer-form">
+                                    <div class="composer-top">
+                                        <div id="composer-avatar" class="avatar-badge avatar-large">MT</div>
+                                        <label class="composer-input">
+                                            <span>Neuer Beitrag</span>
+                                            <textarea name="content" rows="3" placeholder="Was beschäftigt dich gerade?" required></textarea>
+                                        </label>
+                                    </div>
+                                    <div class="composer-footer">
+                                        <span class="muted">Dein Beitrag wird sofort im Feed angezeigt.</span>
+                                        <button type="submit" class="button primary">Posten</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div id="feed-list" class="feed-list"></div>
+                        </section>
+
+                        <section id="profile-section" class="app-section hidden">
+                            <section class="card profile-hero">
+                                <div class="profile-hero-main">
+                                    <div id="profile-avatar" class="avatar-badge avatar-xl">MT</div>
+                                    <div>
+                                        <h2 id="profile-banner-name">Profil</h2>
+                                        <p id="profile-banner-handle" class="muted">@profil</p>
+                                    </div>
+                                </div>
+
+                                <div class="profile-stats">
+                                    <article class="stat-chip">
+                                        <span>Beiträge</span>
+                                        <strong id="profile-post-count">0</strong>
+                                    </article>
+                                    <article class="stat-chip">
+                                        <span>Kommentare</span>
+                                        <strong id="profile-comment-count">0</strong>
+                                    </article>
+                                    <article class="stat-chip">
+                                        <span>Rolle</span>
+                                        <strong id="profile-role-label">-</strong>
+                                    </article>
+                                    <article class="stat-chip">
+                                        <span>Status</span>
+                                        <strong id="profile-state-label">-</strong>
+                                    </article>
+                                </div>
+                            </section>
+
+                            <div class="profile-grid">
+                                <section class="card">
+                                    <header class="card-head">
+                                        <div>
+                                            <span class="card-label">Einstellungen</span>
+                                            <h2>Profil bearbeiten</h2>
+                                        </div>
+                                    </header>
+
+                                    <form id="profile-form" class="stack-form">
+                                        <label>
+                                            Benutzername
+                                            <input id="profile-username" name="username" type="text" required>
+                                        </label>
+                                        <label>
+                                            Neues Passwort
+                                            <input id="profile-password" name="newPassword" type="password" placeholder="Leer lassen, wenn es gleich bleiben soll">
+                                        </label>
+                                        <button type="submit" class="button primary wide">Profil speichern</button>
+                                    </form>
+                                </section>
+
+                                <section class="card">
+                                    <header class="card-head">
+                                        <div>
+                                            <span class="card-label">Aktivität</span>
+                                            <h2>Deine Übersicht</h2>
+                                        </div>
+                                    </header>
+
+                                    <div class="activity-columns">
+                                        <div>
+                                            <h3>Beiträge</h3>
+                                            <ul id="activity-posts" class="simple-list activity-list"></ul>
+                                        </div>
+                                        <div>
+                                            <h3>Kommentare</h3>
+                                            <ul id="activity-comments" class="simple-list activity-list"></ul>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </section>
+
+                        <section id="admin-section" class="app-section hidden">
+                            <section class="card">
+                                <div class="section-head">
+                                    <div>
+                                        <h2>Benutzerverwaltung</h2>
+                                        <p class="section-copy">Benutzer sperren oder entsperren.</p>
+                                    </div>
+                                    <button id="reload-admin-button" class="button subtle">Aktualisieren</button>
+                                </div>
+
+                                <div id="admin-users" class="admin-user-list"></div>
+                            </section>
+                        </section>
+                    </section>
+
+                    <aside class="details-column">
+                        <section class="card side-card">
+                            <header class="card-head compact">
+                                <div>
+                                    <span class="card-label">Dein Konto</span>
+                                    <h3 id="summary-name">Nicht eingeloggt</h3>
+                                </div>
+                            </header>
+
+                            <div class="side-profile">
+                                <div id="summary-avatar" class="avatar-badge avatar-large">MT</div>
+                                <div>
+                                    <p id="summary-handle" class="muted">@guest</p>
+                                    <div class="account-pills">
+                                        <span id="summary-role" class="pill hidden"></span>
+                                        <span id="summary-state" class="pill hidden"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="card side-card">
+                            <header class="card-head compact">
+                                <div>
+                                    <span class="card-label">Übersicht</span>
+                                    <h3>Aktivität</h3>
+                                </div>
+                            </header>
+
+                            <div class="summary-grid">
+                                <article class="summary-box">
+                                    <span>Beiträge</span>
+                                    <strong id="summary-post-count">0</strong>
+                                </article>
+                                <article class="summary-box">
+                                    <span>Kommentare</span>
+                                    <strong id="summary-comment-count">0</strong>
+                                </article>
+                            </div>
+                        </section>
+                    </aside>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/app.js" defer></script>
+</body>
+</html>

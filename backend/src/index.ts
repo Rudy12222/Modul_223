@@ -1,4 +1,5 @@
 import "./db/database";
+import path from "node:path";
 import express, { NextFunction, Request, Response } from "express";
 import authRoutes from "./routes/authRoutes";
 import commentRoutes from "./routes/commentRoutes";
@@ -8,6 +9,7 @@ import userRoutes from "./routes/userRoutes";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+const FRONTEND_PATH = path.resolve(__dirname, "../../frontend");
 
 app.use(express.json());
 
@@ -20,6 +22,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/reactions", reactionRoutes);
 app.use("/api/users", userRoutes);
+app.use(express.static(FRONTEND_PATH));
 
 app.use((_req: Request, res: Response) => {
     res.status(404).json({ error: "Route wurde nicht gefunden." });
