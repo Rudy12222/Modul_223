@@ -1,0 +1,9 @@
+{
+  "name": "lb223-minitwitter",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix backend run dev",
+    "typecheck": "npm --prefix backend run typecheck",
+    "build": "npm --prefix backend run build"
+  }
+}
