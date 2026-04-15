@@ -1,21 +1,23 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { NextFunction, Response, Router } from "express";
+import { requireAuth } from "../middleware/authMiddleware";
 import { CommentService } from "../services/CommentService";
-import { Role } from "../types/Role";
+import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 
 const router = Router();
 const commentService = new CommentService();
 
-router.post("/", (req: Request, res: Response, next: NextFunction) => {
+router.use(requireAuth);
+
+router.post("/", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const { content, userId, postId } = req.body as {
+        const { content, postId } = req.body as {
             content?: string;
-            userId?: number;
             postId?: number;
         };
 
         const comment = commentService.createComment(
             content ?? "",
-            Number(userId),
+            req.user!.id,
             Number(postId)
         );
 
@@ -28,19 +30,17 @@ router.post("/", (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
-router.patch("/:commentId", (req: Request, res: Response, next: NextFunction) => {
+router.patch("/:commentId", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const { content, actorUserId, actorRole } = req.body as {
+        const { content } = req.body as {
             content?: string;
-            actorUserId?: number;
-            actorRole?: string;
         };
 
         const comment = commentService.updateComment(
             Number(req.params.commentId),
             content ?? "",
-            Number(actorUserId),
-            parseRole(actorRole)
+            req.user!.id,
+            req.user!.role
         );
 
         res.json({
@@ -52,17 +52,12 @@ router.patch("/:commentId", (req: Request, res: Response, next: NextFunction) =>
     }
 });
 
-router.delete("/:commentId", (req: Request, res: Response, next: NextFunction) => {
+router.delete("/:commentId", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const { actorUserId, actorRole } = req.body as {
-            actorUserId?: number;
-            actorRole?: string;
-        };
-
         commentService.deleteComment(
             Number(req.params.commentId),
-            Number(actorUserId),
-            parseRole(actorRole)
+            req.user!.id,
+            req.user!.role
         );
 
         res.json({ message: "Kommentar erfolgreich gelöscht." });
@@ -70,13 +65,5 @@ router.delete("/:commentId", (req: Request, res: Response, next: NextFunction) =
         next(error);
     }
 });
-
-function parseRole(roleValue: string | undefined): Role {
-    if (!roleValue || !Object.values(Role).includes(roleValue as Role)) {
-        throw new Error("Die Rolle ist ungültig.");
-    }
-
-    return roleValue as Role;
-}
 
 export default router;

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { User } from "../models/User";
 import { AuthService } from "../services/AuthService";
+import { createAuthToken } from "../utils/authToken";
 
 const router = Router();
 const authService = new AuthService();
@@ -32,8 +33,15 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
 
         const user = authService.login(username ?? "", password ?? "");
 
+        if (user.id === undefined) {
+            throw new Error("Der Benutzer wurde nicht gefunden.");
+        }
+
+        const token = createAuthToken(user.id);
+
         res.json({
             message: "Login erfolgreich.",
+            token,
             user: serializeUser(user)
         });
     } catch (error) {

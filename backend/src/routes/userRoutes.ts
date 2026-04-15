@@ -1,12 +1,16 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { NextFunction, Response, Router } from "express";
+import { requireAuth, requireRole, requireSameUserOrAdmin } from "../middleware/authMiddleware";
 import { User } from "../models/User";
 import { UserService } from "../services/UserService";
+import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { Role } from "../types/Role";
 
 const router = Router();
 const userService = new UserService();
 
-router.get("/check-username", (req: Request, res: Response, next: NextFunction) => {
+router.use(requireAuth);
+
+router.get("/check-username", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const username = String(req.query.username ?? "");
         const excludeUserId = req.query.excludeUserId !== undefined
@@ -24,7 +28,7 @@ router.get("/check-username", (req: Request, res: Response, next: NextFunction) 
     }
 });
 
-router.get("/:userId", (req: Request, res: Response, next: NextFunction) => {
+router.get("/:userId", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const user = userService.getUserById(Number(req.params.userId));
 
@@ -34,7 +38,7 @@ router.get("/:userId", (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
-router.patch("/:userId/profile", (req: Request, res: Response, next: NextFunction) => {
+router.patch("/:userId/profile", requireSameUserOrAdmin("userId"), (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const { username, newPassword } = req.body as {
             username?: string;
@@ -56,7 +60,7 @@ router.patch("/:userId/profile", (req: Request, res: Response, next: NextFunctio
     }
 });
 
-router.get("/:userId/activity", (req: Request, res: Response, next: NextFunction) => {
+router.get("/:userId/activity", requireSameUserOrAdmin("userId"), (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const activity = userService.getUserActivity(Number(req.params.userId));
 
@@ -69,15 +73,11 @@ router.get("/:userId/activity", (req: Request, res: Response, next: NextFunction
     }
 });
 
-router.patch("/:userId/block", (req: Request, res: Response, next: NextFunction) => {
+router.patch("/:userId/block", requireRole(Role.ADMIN), (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const { actorRole } = req.body as {
-            actorRole?: string;
-        };
-
         const user = userService.blockUser(
             Number(req.params.userId),
-            parseRole(actorRole)
+            req.user!.role
         );
 
         res.json({
@@ -89,15 +89,11 @@ router.patch("/:userId/block", (req: Request, res: Response, next: NextFunction)
     }
 });
 
-router.patch("/:userId/unblock", (req: Request, res: Response, next: NextFunction) => {
+router.patch("/:userId/unblock", requireRole(Role.ADMIN), (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const { actorRole } = req.body as {
-            actorRole?: string;
-        };
-
         const user = userService.unblockUser(
             Number(req.params.userId),
-            parseRole(actorRole)
+            req.user!.role
         );
 
         res.json({
@@ -117,14 +113,6 @@ function serializeUser(user: User) {
         blocked: user.blocked,
         createdAt: user.createdAt
     };
-}
-
-function parseRole(roleValue: string | undefined): Role {
-    if (!roleValue || !Object.values(Role).includes(roleValue as Role)) {
-        throw new Error("Die Rolle ist ungültig.");
-    }
-
-    return roleValue as Role;
 }
 
 export default router;

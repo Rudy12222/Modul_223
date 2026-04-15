@@ -1,21 +1,24 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { NextFunction, Response, Router } from "express";
+import { requireAuth } from "../middleware/authMiddleware";
 import { ReactionService } from "../services/ReactionService";
+import { AuthenticatedRequest } from "../types/AuthenticatedRequest";
 import { ReactionType } from "../types/ReactionType";
 
 const router = Router();
 const reactionService = new ReactionService();
 
-router.post("/", (req: Request, res: Response, next: NextFunction) => {
+router.use(requireAuth);
+
+router.post("/", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const { type, userId, postId } = req.body as {
+        const { type, postId } = req.body as {
             type?: string;
-            userId?: number;
             postId?: number;
         };
 
         const reaction = reactionService.setReaction(
             parseReactionType(type),
-            Number(userId),
+            req.user!.id,
             Number(postId)
         );
 
@@ -28,7 +31,7 @@ router.post("/", (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
-router.get("/post/:postId/counts", (req: Request, res: Response, next: NextFunction) => {
+router.get("/post/:postId/counts", (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const counts = reactionService.getReactionCounts(Number(req.params.postId));
 

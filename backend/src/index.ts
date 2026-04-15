@@ -39,6 +39,13 @@ app.listen(PORT, () => {
 
 function getStatusCode(message: string): number {
     if (
+        message.includes("Anmeldung erforderlich")
+        || message.includes("Token")
+    ) {
+        return 401;
+    }
+
+    if (
         message.includes("nicht gefunden")
         || message.includes("wurde nicht gefunden")
     ) {
@@ -48,6 +55,7 @@ function getStatusCode(message: string): number {
     if (
         message.includes("dürfen")
         || message.includes("Nur Administratoren")
+        || message.includes("gesperrt")
     ) {
         return 403;
     }
